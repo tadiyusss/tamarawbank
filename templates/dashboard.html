@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang='en'>
+    <head>
+        <meta charset='utf-8'>
+        <meta name='viewport' content='width=device-width, initial-scale=1'>
+        <title>Bootstrap demo</title>
+        <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css' rel='stylesheet' integrity='sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD' crossorigin='anonymous'>
+        <link rel="stylesheet" href="/static/css/style.css">
+    </head>
+    <body class="bg-black">
+        <div class="toast-container position-fixed bottom-0 end-0 p-3">
+            <div id="liveToast" class="toast text-bg-dark" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header text-bg-dark">
+                    <strong class="me-auto">Notification</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    <p id="toastMessage"></p>
+                </div>
+            </div>
+        </div>
+        <div class="container mobile-container text-light">
+            <div class="row mx-1 my-4">
+                <div class="col-2"></div>
+                <div class="col cursor-pointer" data-bs-toggle="offcanvas" data-bs-target="#menuOffcanvas">
+                    <img src="/static/images/default_user.webp" width="40" class="float-end rounded-circle">
+                    <p class="float-end mx-3 mt-2" id="namePlaceholder">Firstname, Lastname</p>
+                </div>
+            </div>
+            <div class="card rounded-2 my-bg-dark p-4">
+                <p class="fs-4 fw-bold mb-4" id="greetPlaceholder"></p>
+                <div class="row">
+                    <div class="col card rounded bg-dark p-2 mx-1 px-3">
+                        <p class="fw-semibold m-0 fs-small text-muted">Balance</p>
+                        <p class="m-0 fw-bold fs-3" id="balancePlaceholder">₱</p>
+                    </div>
+                </div>
+
+                <div class="row mt-2">
+                    <div class="col card rounded bg-dark p-2 mx-1 px-3 text-center cursor-pointer" data-bs-toggle="offcanvas" data-bs-target="#transferOffcanvas">
+                        <img src="/static/images/blank.svg" width="45" class="d-block mx-auto mt-1">
+                        <p class="fw-semibold m-0 fs-small text-muted mt-2 mb-0">Transfer</p>
+                    </div>
+                    <div class="col card rounded bg-dark p-2 mx-1 px-3 text-center" data-bs-toggle="offcanvas" data-bs-target="#receiveOffcanvas">
+                        <img src="/static/images/blank.svg" width="45" class="d-block mx-auto mt-1">
+                        <p class="fw-semibold m-0 fs-small text-muted mt-2 mb-0">Receive</p>
+                    </div>
+                </div>
+                <p class="fs-4 fw-bold my-3">Transaction History</p>
+                <div class="transactions" id="transactionsPlaceholder">
+
+                </div>
+            
+            </div>
+            <!-- Offcanvas -->
+
+            <div class="offcanvas offcanvas-bottom d-block mx-auto my-bg-dark rounded-top text-light" id="transferOffcanvas" style="width: 380px; height: inherit;">
+                <div class="offcanvas-header">
+                    <h5 class="m-0">Transfer</h5>
+                </div>  
+                <div class="offcanvas-body large">
+                    <div class="mb-3">
+                        <label for="recipient" class="form-label">Recipient</label>
+                        <input type="number" class="no-arrows outline-none w-100 border-0 bg-gray rounded p-2 text-light" name="recipient" id="recipient" placeholder="Enter Recipient's Student Number">
+                    </div>
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">Amount</label>
+                        <input type="number" class="no-arrows outline-none w-100 border-0 bg-gray rounded p-2 text-light" name="amount" id="amount" placeholder="Enter Amount">
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Message</label>
+                        <textarea class="outline-none w-100 border-0 bg-gray rounded p-2 text-light" name="message" id="message" rows="2" placeholder="Enter Message"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="outline-none w-100 border-0 bg-gray rounded p-2 text-light" name="password" id="password" placeholder="Enter Password">
+                    </div>
+                    <button class="btn btn-success w-100" onclick="transferForm()">Transfer</button>
+                    <button class="btn btn-primary w-100 mt-2" onclick="scanQRForm()" data-bs-toggle="offcanvas" data-bs-target="#qrScanOffcanvas">Scan QR Code</button>
+                </div>
+            </div>
+
+            <div class="offcanvas offcanvas-bottom d-block mx-auto my-bg-dark rounded-top text-light" id="receiveOffcanvas" style="width: 380px; height: 80%;">
+                <div class="offcanvas-header">
+                    <h5 class="m-0">Receive</h5>
+                </div>
+                <div class="offcanvas-body large">
+                    <img class="d-block mx-auto mt-3 rounded" src="/static/qr/{{session['student_number']}}.png">
+                    <p class="text-center mt-3">Scan this QR Code to receive money</p>
+                </div>
+            </div>
+
+            <div class="offcanvas offcanvas-bottom d-block mx-auto my-bg-dark rounded-top text-light" id="qrScanOffcanvas" style="width: 380px; height:inherit;">
+                <div class="offcanvas-header">
+                    <h5 class="m-0">Scan QR Code</h5>
+                </div>
+                <div class="offcanvas-body large">
+                    <div id="qrForm">
+                        <div class="mb-3">
+                            <label for="amount" class="form-label">Amount</label>
+                            <input type="number" class="no-arrows outline-none w-100 border-0 bg-gray rounded p-2 text-light" name="amount" id="qrfAmount" placeholder="Enter Amount">
+                        </div>
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message</label>
+                            <textarea class="outline-none w-100 border-0 bg-gray rounded p-2 text-light" name="message" id="qrfMessage" rows="2" placeholder="Enter Message"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="outline-none w-100 border-0 bg-gray rounded p-2 text-light" name="password" id="qrfPassword" placeholder="Enter Password">
+                        </div>
+                        <button class="btn btn-success w-100 mt-2" onclick="ShowQRScanner()">Continue</button>
+                    </div>
+                    <div id="qrScanner">
+                        <div class="w-100 border" id="qrReader" style="height: 500px;">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="offcanvas offcanvas-bottom d-block mx-auto my-bg-dark rounded-top text-light" id="menuOffcanvas" style="width: 380px; height: inherit;">
+                <div class="offcanvas-header">
+                    <h5 class="m-0">Menu</h5>
+                </div>
+                <div class="offcanvas-body large">
+                    <div class="row mx-auto p-2 bg-dark w-100 rounded">
+                        <a href="/dashboard/edit_profile" class="text-center text-decoration-none text-light">Edit Profile</a>
+                    </div>
+                    <div class="row mx-auto p-2 bg-dark w-100 rounded my-2">
+                        <a href="/logout" class="text-center text-decoration-none text-light">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="/static/lib/html5-qrcode.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.4.js" integrity="sha256-a9jBBRygX1Bh5lt8GZjXDzyOB+bWve9EiO7tROUtj/E=" crossorigin="anonymous"></script>
+        <script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js' integrity='sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN' crossorigin='anonymous'></script>
+        <script>
+            
+                    
+            
+
+            
+
+            var interval = window.setInterval(function(){
+                updateData()
+                updateHistory()
+            }, 1000);
+
+            function updateData(){
+                $.post('/api/user_data', function(result){
+                    document.getElementById('namePlaceholder').innerHTML = result.data.fname + " " + result.data.lname
+                    document.getElementById('balancePlaceholder').innerHTML = "₱ " + result.data.balance
+                    document.getElementById('greetPlaceholder').innerHTML = "Hello, " + result.data.fname
+
+                });
+            }
+
+            function ShowQRScanner(){
+                if($("#qrfAmount").val() == "" || $("#qrfPassword").val() == ""){
+                    
+                    toastMessage("Please fill up all the fields")
+                } else {
+                    $('#qrForm').hide()
+                    $('#qrScanner').show()
+                    var html5QrcodeScanner = new Html5QrcodeScanner("qrReader", { fps: 10, qrbox: 250 });
+                    
+                    function onScanSuccess(decodedText, decodedResult) {
+                        data = {
+                            recipient: decodedText,
+                            amount: $("#qrfAmount").val(),
+                            message: $("#qrfMessage").val(),
+                            password: $("#qrfPassword").val()
+                        }
+
+                        $.post('/api/send', data , function(result){
+                            toastMessage(result.message)
+                            const qrScanOffcanvas = document.getElementById('qrScanOffcanvas')
+                            const qrScanOffcanvasBootstrap = bootstrap.Offcanvas.getInstance(qrScanOffcanvas)
+                            qrScanOffcanvasBootstrap.hide()
+                            $("#qrfAmount").val('');
+                            $("#qrfMessage").val('');
+                            $("#qrfPassword").val('');
+
+                            //update data
+                            updateData()
+                            updateHistory()
+                        })
+                        html5QrcodeScanner.clear();
+                    }
+
+                    html5QrcodeScanner.render(onScanSuccess);
+                    }
+                
+            }
+
+            function scanQRForm(){
+                $('#qrScanner').hide()
+                const transferOffcanvas = document.getElementById('transferOffcanvas')
+                const transferOffcanvasBootstrap = bootstrap.Offcanvas.getInstance(transferOffcanvas)
+                transferOffcanvasBootstrap.hide()
+                $('#qrForm').show()
+            }
+
+            function updateHistory(){
+                $.post('/api/transaction_history', function(result){
+                    for(i=0;i<result.data.length;i++){
+                        if(result.data[i]['read'] == 0){
+                            if(result.data[i]['receiver'] == {{session['student_number']}}){
+                                console.log(result.data[i]['identifier'])
+                                if(result.data[i]['message'] == ""){
+                                    toastMessage("You have received ₱" + result.data[i]['amount'] + " from " + result.data[i]['sender'])
+                                } else {
+                                    toastMessage("You have received ₱" + result.data[i]['amount'] + " from " + result.data[i]['sender'] + " with message: " + result.data[i]['message'])
+                                }
+                                $.post('/api/transaction_history', {identifier: result.data[i]['identifier']})
+                            }
+                            
+                        }
+                    }
+                    const transactionsPlaceholder = document.getElementById('transactionsPlaceholder')
+                    transactionsPlaceholder.innerHTML = ""
+                    if(result.data.length < 1){
+                        $('#transactionsPlaceholder').html('<p class="text-muted text-center fw-semibold">No transactions yet</p>')
+                    }
+                    for(let i=0; i<result.data.length; i++){
+                        if(result.data[i]['sender'] == {{session['student_number']}}){
+                            var color = "text-danger"
+                            var type = "Expense"
+                        } else {
+                            var color = "text-success"
+                            var type = "Income"
+                        }
+                        $('#transactionsPlaceholder').append(`<div class="row">
+                            <div class="col card rounded bg-dark p-2 mx-1 px-3 mb-2">
+                                <div class="row">
+                                    <div class="col">
+                                        <p class="text-muted fs-small m-0">` + type + `</p>
+                                        <p class="fs-3 ` + color + ` m-0 fw-semibold">₱` + result.data[i]['amount'] + `</p>
+                                    </div>
+                                    <div class="col">
+                                        <img src="/static/images/blank.svg" width="40" class="d-block float-end" style="margin-top: 10px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div> `)
+                    }
+                    return "done";
+                    
+                });
+            }
+
+            function transferForm(){
+                const inputRecipient = document.getElementById('recipient')
+                const inputAmount = document.getElementById('amount')
+                const inputMessage = document.getElementById('message')
+                const inputPassword = document.getElementById('password')
+
+                data = {
+                    recipient: inputRecipient.value,
+                    amount: inputAmount.value,
+                    message: inputMessage.value,
+                    password: inputPassword.value
+                }
+
+                $.post('/api/send', data , function(result){
+                    toastMessage(result.message)
+                    const transferOffcanvas = document.getElementById('transferOffcanvas')
+                    const transferOffcanvasBootstrap = bootstrap.Offcanvas.getInstance(transferOffcanvas)
+                    transferOffcanvasBootstrap.hide()
+
+                    //update data
+                    updateData()
+                    updateHistory()
+                })
+            }
+
+            function toastMessage(message){
+                const toastTrigger = document.getElementById('liveToastBtn')
+                const toastLiveExample = document.getElementById('liveToast')
+                const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample)
+                const toastMessage = document.getElementById('toastMessage')
+                toastMessage.innerHTML = message
+                toastBootstrap.show()
+            }
+            updateData()
+            updateHistory()
+        </script>
+    </body>
+</html>
