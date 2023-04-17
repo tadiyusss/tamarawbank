@@ -1,0 +1,29 @@
+input[type=submit] {
+    height: 35px;
+}
+.outline-none:focus{
+    outline:none;
+}
+.my-bg-dark{
+    background-color: #161618;
+}
+.bg-gray{
+    background-color: #212124;
+}
+.mobile-container{
+    max-width: 400px;
+}
+.fs-small{
+    font-size: 0.8rem;
+}
+.text-muted{
+    color: #7c8896 !important;
+}
+.cursor-pointer{
+    cursor: pointer;
+}
+.no-arrows::-webkit-outer-spin-button,
+.no-arrows::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
