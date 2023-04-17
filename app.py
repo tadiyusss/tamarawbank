@@ -28,6 +28,9 @@ else:
     config = json.loads(file.read())
     file.close()
 
+if 'qr' not in os.listdir('static'):
+    os.mkdir('static/qr')
+
 if '--debug' in sys.argv:
     config['debug'] = True
 
